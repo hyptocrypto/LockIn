@@ -26,7 +26,7 @@ class CredentialsManager:
         self._db.create_tables([Credentials])
         self._db.close()
         
-    def _decrypt(self, service_name: str, password: str) -> Optional[Tuple[str, str]]:
+    def _decrypt(self, service_name: str, encryption_password: str) -> Optional[Tuple[str, str]]:
         #Test if service_name in in db
         try:
             self._db.connect()
@@ -37,7 +37,7 @@ class CredentialsManager:
             self._db.close()
         
         # Encryption 
-        key = base64.urlsafe_b64encode(self._kdf.derive(password)) 
+        key = base64.urlsafe_b64encode(self._kdf.derive(encryption_password)) 
         f = Fernet(key)
 
         # Try to decrypt with given password. If successful, password was correct. 
@@ -57,7 +57,7 @@ class CredentialsManager:
         service_name: str, 
         service_username: str,
         service_password: str,
-        encryption_password: str) -> Credentials:
+        encryption_password: str) -> Optional[Credentials]:
         try:
             self._db.connect()
             f = Fernet(base64.urlsafe_b64encode(self._kdf.derive(encryption_password)))
@@ -87,3 +87,12 @@ class CredentialsManager:
         services = sorted([row.service.capitalize() for row in Credentials.select()])
         self._db.close()
         return services
+
+    def save_service(self, service_name, service_username, service_password, encryption_password):
+        saved = self._encrypt(service_name, service_username, service_password, encryption_password)
+        if saved:
+            return True
+        return
+
+    def fetch_service(self, service_name, encryption_password):
+        username, password = self._decrypt(service_name, encryption_password)
