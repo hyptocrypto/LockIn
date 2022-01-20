@@ -5,12 +5,15 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
-from peewee import *
-from lockin.models import Credentials
-from typing import Optional
+from settings import DB_URI
+from peewee import SqliteDatabase
+from models import Credentials
+from typing import Optional, Tuple
 
 class CredentialsManager:
-    def __init__(self, db: "peewee.SqliteDatabase" ):
+    """Main interface for interacting with the data layer"""
+    def __init__(self):
+        # Init manager and db
         self._kdf = PBKDF2HMAC(
             algorithm = hashes.SHA256(),
             length =32, 
@@ -18,13 +21,15 @@ class CredentialsManager:
             iterations = 100000,
             backend = default_backend()
         )
-        self._db = db
+        self._db = SqliteDatabase(DB_URI)
+        self._db.connect()
         self._db.create_tables([Credentials])
+        self._db.close()
         
-    def _decrypt(self, service_name: str, password: str) -> Optional(str, str):
+    def _decrypt(self, service_name: str, password: str) -> Optional[Tuple[str, str]]:
         #Test if service_name in in db
         try:
-            self._db.open()
+            self._db.connect()
             service = Credentials(Credentials.service == service_name)
         except Credentials.DoesNotExist:
             raise Exception(f"Service {service_name} not found")
@@ -54,7 +59,7 @@ class CredentialsManager:
         service_password: str,
         encryption_password: str) -> Credentials:
         try:
-            self._db.open()
+            self._db.connect()
             f = Fernet(base64.urlsafe_b64encode(self._kdf.derive(encryption_password)))
             service_list = [row.service for row in Credentials.select()]
             
@@ -75,3 +80,10 @@ class CredentialsManager:
             raise Exception(f"Error encrypting credentials: {e}")
         finally:
             self._db.close()
+            
+            
+    def list_services(self):
+        self._db.connect()
+        services = sorted([row.service.capitalize() for row in Credentials.select()])
+        self._db.close()
+        return services

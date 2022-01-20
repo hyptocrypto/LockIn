@@ -1,5 +1,5 @@
-from peewee import SqliteDatabase, CharField
-
+from peewee import SqliteDatabase, CharField, Model
+from settings import DB_URI
 
 class Credentials(Model):
     service = CharField()
@@ -7,5 +7,5 @@ class Credentials(Model):
     password = CharField()
     
     class Meta:
-        database = SqliteDatabase("credentials.db")
+        database = SqliteDatabase(DB_URI)
         table_name = 'credentials'
