@@ -1,5 +1,5 @@
 from peewee import SqliteDatabase, CharField, Model
-from settings import DB_URI
+from lockin.settings import DB_URI
 
 class Credentials(Model):
     service = CharField()

@@ -12,7 +12,10 @@ formal_name = "LockIn"
 description = "Encrypted Credentials Manager"
 icon = "src/lockin/resources/lockin"
 sources = ['src/lockin']
-requires = []
+requires = [
+    "peewee",
+    "cryptography",
+]
 
 
 [tool.briefcase.app.lockin.macOS]

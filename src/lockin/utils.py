@@ -5,50 +5,53 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
-from settings import DB_URI
+from cryptography.fernet import InvalidToken
+from lockin.settings import DB_URI
+from lockin.models import Credentials
 from peewee import SqliteDatabase
-from models import Credentials
 from typing import Optional, Tuple
 
 class CredentialsManager:
     """Main interface for interacting with the data layer"""
     def __init__(self):
         # Init manager and db
-        self._kdf = PBKDF2HMAC(
-            algorithm = hashes.SHA256(),
-            length =32, 
-            salt = b'Y\xa8B\x85\x8d\x95\xe1\xb9\x0e\x19\x11\x17\x03.\n\x9d',
-            iterations = 100000,
-            backend = default_backend()
-        )
         self._db = SqliteDatabase(DB_URI)
         self._db.connect()
         self._db.create_tables([Credentials])
         self._db.close()
         
+    def _gen_kdf(self):
+        return PBKDF2HMAC(
+        algorithm = hashes.SHA256(),
+        length =32, 
+        salt = b'Y\xa8B\x85\x8d\x95\xe1\xb9\x0e\x19\x11\x17\x03.\n\x9d',
+        iterations = 100000,
+        backend = default_backend()
+        )
+        
     def _decrypt(self, service_name: str, encryption_password: str) -> Optional[Tuple[str, str]]:
         #Test if service_name in in db
         try:
-            self._db.connect()
-            service = Credentials(Credentials.service == service_name)
+            self._db.connect()            
+            service = Credentials.get(Credentials.service == service_name.lower())
         except Credentials.DoesNotExist:
             raise Exception(f"Service {service_name} not found")
         finally:    
             self._db.close()
         
         # Encryption 
-        key = base64.urlsafe_b64encode(self._kdf.derive(encryption_password)) 
-        f = Fernet(key)
+        kdf = self._gen_kdf()
+        f = Fernet(base64.urlsafe_b64encode(kdf.derive(encryption_password.encode())))
 
         # Try to decrypt with given password. If successful, password was correct. 
         try:
-            decrypted_username = f.decrypt(service.username)
-            decrypted_password = f.decrypt(service.password)
+            decrypted_username = f.decrypt(service.username.encode())
+            decrypted_password = f.decrypt(service.password.encode())
             username = decrypted_username.decode()
             password = decrypted_password.decode()
             return username, password
-        except TypeError:
-            raise Exception("Password incorrect")
+        except InvalidToken:
+            return
         finally:
             self._db.close()
         
@@ -60,7 +63,8 @@ class CredentialsManager:
         encryption_password: str) -> Optional[Credentials]:
         try:
             self._db.connect()
-            f = Fernet(base64.urlsafe_b64encode(self._kdf.derive(encryption_password)))
+            kdf = self._gen_kdf()
+            f = Fernet(base64.urlsafe_b64encode(kdf.derive(encryption_password.encode())))
             service_list = [row.service for row in Credentials.select()]
             
             if service_name in service_list:
@@ -96,3 +100,15 @@ class CredentialsManager:
 
     def fetch_service(self, service_name, encryption_password):
         username, password = self._decrypt(service_name, encryption_password)
+        if not all([username, password]):
+            return
+        return username, password
+
+    def deltet_service(self, service_name, encryption_password):
+        try:
+            username, password = self._decrypt(service_name, encryption_password)
+            Credentials.delete(Credentials.service == service_name.lower())
+        except TypeError:
+        if not all([username, password]):
+            return
+        return username, password
