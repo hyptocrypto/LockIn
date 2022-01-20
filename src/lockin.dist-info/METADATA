@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Briefcase-Version: 0.3.5
+Name: lockin
+Formal-Name: LockIn
+App-ID: com.lockin.lockin
+Version: 0.0.1
+Home-page: https://lockin.com/lockin
+Author: Julian Baumgartner
+Author-email: julian@lockin.com
+Summary: Encrypted Credentials Manager

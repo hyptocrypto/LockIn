@@ -1,0 +1,49 @@
+[tool.briefcase]
+project_name = "LockIn"
+bundle = "com.lockin"
+version = "0.0.1"
+url = "https://lockin.com/lockin"
+license = "MIT license"
+author = 'Julian Baumgartner'
+author_email = "julian@lockin.com"
+
+[tool.briefcase.app.lockin]
+formal_name = "LockIn"
+description = "Encrypted Credentials Manager"
+icon = "src/lockin/resources/lockin"
+sources = ['src/lockin']
+requires = []
+
+
+[tool.briefcase.app.lockin.macOS]
+requires = [
+    'toga-cocoa>=0.3.0.dev20',
+]
+
+[tool.briefcase.app.lockin.linux]
+requires = [
+    'toga-gtk>=0.3.0.dev20',
+]
+system_requires = [
+    'libgirepository1.0-dev',
+    'libcairo2-dev',
+    'libpango1.0-dev',
+    'libwebkitgtk-3.0-0',
+    'gir1.2-webkit-3.0',
+]
+
+[tool.briefcase.app.lockin.windows]
+requires = [
+    'toga-winforms>=0.3.0.dev20',
+]
+
+# Mobile deployments
+[tool.briefcase.app.lockin.iOS]
+requires = [
+    'toga-iOS>=0.3.0.dev20',
+]
+
+[tool.briefcase.app.lockin.android]
+requires = [
+    'toga-android>=0.3.0.dev20',
+]
