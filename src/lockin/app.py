@@ -35,6 +35,7 @@ class LockIn(toga.App):
             if saved:
                 self.encrypt_popup.confirm_dialog("Saved!", f"New service saved: {self.service_name_input.value}")
                 self.encrypt_popup.close()
+                self.gen_service_table()
                 return
         else:
             self.encrypt_popup.error_dialog("Error!", "Empty values not permitted")
@@ -49,13 +50,21 @@ class LockIn(toga.App):
                 self.decryption_password.value
             )
         except TypeError:
-            self.decrypt_popup.error_dialog("Error!", f"Password ( {self.decryption_password.value} ) incorrect.")
+            self.decrypt_popup.error_dialog("Error!", f"Password '{self.decryption_password.value}' incorrect.")
             return
             
         self.decrypt_popup.info_dialog("Success!", f"Username: {username}\nPassword: {password} ")
         self.decrypt_popup.close()
-        
-        
+
+    def delete_service(self, *args, **kwargs):
+        deleted = self.manager.delete_service(self.selected_service, self.delete_decryption_password.value)
+        if deleted:
+            self.delete_popup.info_dialog("Success!", f"Service: '{self.selected_service}' deleted.")
+            self.delete_popup.close()
+            self.gen_service_table()
+            return
+        self.delete_popup.error_dialog("Error", f"Password '{self.delete_decryption_password.value}' incorrect. Service not deleted.")
+    
     
     def encrypt_popup_handler(self, *args, **kwargs):
         self.encrypt_popup = toga.Window(title="New Service", size=(600, 250))
@@ -76,7 +85,7 @@ class LockIn(toga.App):
             self.encryption_password,
             self.save_button
             ]
-        )
+        )        
         self.encrypt_popup.show()
         
     def decrypt_popup_handler(self, *args, **kwargs):
@@ -88,7 +97,7 @@ class LockIn(toga.App):
         self.decrypt_label = toga.Label(f"Please enter decryption password.", style=Styles.DECRYPT_LABEL_STYLE)
         self.decryption_password = toga.TextInput(placeholder="Password", style=Styles.DECRYPT_TEXT_INPUT_STYLE)
         self.decrypt_button = toga.Button("Decrypt", style=Styles.DECRYPT_BUTTON_STYLE, on_press=self.fetch_service)
-        
+    
         self.decrypt_popup.content = toga.Box(
             style=Pack(width=300, direction=COLUMN),
             children=[
@@ -98,35 +107,29 @@ class LockIn(toga.App):
             ]
         )
         self.decrypt_popup.show()
+        
+    def delete_popup_handler(self, *args, **kwargs):
+        service = self.selected_service
     
-    def startup(self):
-        """
-        The startup methods acts as the __call__ for a class inheriting from type: toga.aApp.
-        """
+        self.delete_popup = toga.Window(title=f"Delete {service}", size=(600, 200))
+        self.windows.add(self.delete_popup)
         
-        actions = toga.Group("Actions")
+        self.delete_label = toga.Label(f"Please enter decryption password.", style=Styles.DECRYPT_LABEL_STYLE)
+        self.delete_decryption_password = toga.TextInput(placeholder="Password", style=Styles.DECRYPT_TEXT_INPUT_STYLE)
+        self.delete_button = toga.Button("Delete", style=Styles.DECRYPT_BUTTON_STYLE, on_press=self.delete_service)
         
-        add_new = toga.Command(
-            self.encrypt_popup_handler,
-            label='Add New',
-            tooltip='Add new service',
-            icon="resources/add_new.png",
-            group=actions,
-            section="actions",
-            order=2
+        self.delete_popup.content = toga.Box(
+            style=Pack(width=300, direction=COLUMN),
+            children=[
+                self.delete_label,
+                self.delete_decryption_password,
+                self.delete_button
+            ]
         )
-        delete = toga.Command(
-            self.decrypt_popup_handler,
-            label='Delete',
-            tooltip='Delete selected service',
-            icon="resources/delete.png",
-            group=actions,
-            section="actions",
-            order=1
-        )
-        
-        
-        service_container = toga.Table(
+        self.delete_popup.show()
+    
+    def gen_service_table(self):
+        self.main_window.content = toga.Table(
             style=Pack(font_size=100, font_family="Sans", font_weight="bold"),
             headings=["Services"],
             data=self.manager.list_services(), 
@@ -134,11 +137,36 @@ class LockIn(toga.App):
             on_double_click=self.decrypt_popup_handler, 
             missing_value="N/A"
             )
+
+    def startup(self):
+        """
+        The startup methods acts as the __call__ for a class inheriting from type: toga.aApp.
+        """
         
+        self.actions = toga.Group("Actions")
+        
+        add_new = toga.Command(
+            self.encrypt_popup_handler,
+            label='Add New',
+            tooltip='Add new service',
+            icon="resources/add_new.png",
+            group=self.actions,
+            section="actions",
+            order=2
+        )
+        delete = toga.Command(
+            self.delete_popup_handler,
+            label='Delete',
+            tooltip='Delete selected service',
+            icon="resources/delete.png",
+            group=self.actions,
+            section="actions",
+            order=1
+        )
         
         self.main_window = toga.MainWindow(title=self.formal_name, size=(600, 600))
-        self.main_window.content = service_container
-        self.commands.add(add_new)
+        self.gen_service_table()
+        self.commands.add(add_new, delete)
         self.main_window.toolbar.add(add_new, delete)
         self.main_window.show()
 

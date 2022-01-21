@@ -99,16 +99,18 @@ class CredentialsManager:
         return
 
     def fetch_service(self, service_name, encryption_password):
-        username, password = self._decrypt(service_name, encryption_password)
-        if not all([username, password]):
-            return
-        return username, password
-
-    def deltet_service(self, service_name, encryption_password):
         try:
             username, password = self._decrypt(service_name, encryption_password)
-            Credentials.delete(Credentials.service == service_name.lower())
+            return username, password
         except TypeError:
-        if not all([username, password]):
             return
-        return username, password
+
+    def delete_service(self, service_name, encryption_password):
+        try:
+            username, password = self._decrypt(service_name, encryption_password)
+            delete =Credentials.delete().where(Credentials.service == service_name.lower())
+            delete.execute()
+            return True
+        except TypeError:
+            return
+        
