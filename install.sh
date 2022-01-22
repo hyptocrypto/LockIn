@@ -7,7 +7,7 @@ fi
 
 # Create  virtual env for python dependencies
 python3 -m venv env
-source venv/bin/activate
+source env/bin/activate
 
 # Install briefcase
 pip install briefcase
