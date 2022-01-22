@@ -6,8 +6,10 @@ from cryptography.fernet import Fernet
 from cryptography.fernet import InvalidToken
 from lockin.settings import DB_URI
 from lockin.models import Credentials
+from lockin.exceptions import ServiceAlreadyExists, ServiceNotFound
 from peewee import SqliteDatabase
 from typing import Optional, Tuple
+
 
 class CredentialsManager:
     """Main interface for interacting with the data layer"""
@@ -42,7 +44,7 @@ class CredentialsManager:
             self._db.connect()            
             service = Credentials.get(Credentials.service == service_name.lower())
         except Credentials.DoesNotExist:
-            raise Exception(f"Service {service_name} not found")
+            raise ServiceNotFound(f"Service {service_name} not found")
         finally:    
             self._db.close()
         
@@ -78,7 +80,7 @@ class CredentialsManager:
             service_list = [row.service for row in Credentials.select()]
             
             if service_name in service_list:
-                raise Exception(f"Service {service_name} already exists.")
+                raise ServiceAlreadyExists(f"Service {service_name} already exists.")
             
             encrypted_username = f.encrypt(service_username.encode())
             encrypted_password = f.encrypt(service_password.encode())
@@ -89,9 +91,10 @@ class CredentialsManager:
                 username = encrypted_username,
                 password = encrypted_password
             )
-            
+        # Catch if something goes wrong
+        # Pass the exception up so the app can handle if ServiceAlreadyExists exception is thrown
         except Exception as e:
-            raise Exception(f"Error encrypting credentials: {e}")
+            raise e
         finally:
             self._db.close()
             
@@ -125,7 +128,5 @@ class CredentialsManager:
         except TypeError:
             return
         
-            return
-        
-            return
+
         

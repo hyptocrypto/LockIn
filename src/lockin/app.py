@@ -8,6 +8,7 @@ from toga.style.pack import COLUMN, ROW, CENTER
 from lockin.utils import CredentialsManager
 from lockin.styles import Styles
 from lockin.validators import not_null
+from lockin.exceptions import ServiceAlreadyExists
 
 class LockIn(toga.App):
     def __init__(self):
@@ -29,12 +30,12 @@ class LockIn(toga.App):
             self.encryption_password.value
             ]
         if all([not_null(val) for val in inputs]):
-            saved = self.manager.save_service(
-                self.service_name_input.value,
-                self.service_username_input.value,
-                self.service_password_input.value,
-                self.encryption_password.value
-            )
+            try:
+                saved = self.manager.save_service(*inputs)
+            except ServiceAlreadyExists:
+                self.encrypt_popup.error_dialog("Error", f"Service: '{self.service_name_input.value}' already exists.")
+                return
+                
             if saved:
                 self.encrypt_popup.confirm_dialog("Saved!", f"New service saved: {self.service_name_input.value}")
                 self.encrypt_popup.close()
