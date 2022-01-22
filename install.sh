@@ -6,7 +6,7 @@ if ! python3 -c "import virtualenv" &> /dev/null; then
 fi
 
 # Create  virtual env for python dependencies
-virtualenv venv
+python3 -m venv env
 source venv/bin/activate
 
 # Install briefcase
