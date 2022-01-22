@@ -1,7 +1,7 @@
 """
 Encrypted Credentials Manager
 """
-from re import T
+from tokenize import group
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW, CENTER 
@@ -12,7 +12,10 @@ from lockin.validators import not_null
 class LockIn(toga.App):
     def __init__(self):
         self.manager = CredentialsManager()
+        self.actions = toga.Group("Actions")
+        self.selected_service = None
         return super().__init__()
+    
     
     def set_selected_service(self, *args, **kwargs):
         self.selected_service = kwargs.get("row").services
@@ -67,6 +70,7 @@ class LockIn(toga.App):
     
     
     def encrypt_popup_handler(self, *args, **kwargs):
+        """Handler method to be called when Add New button is pressed. This will bring up the add new service popup"""
         self.encrypt_popup = toga.Window(title="New Service", size=(600, 250))
         self.windows.add(self.encrypt_popup)
     
@@ -88,7 +92,13 @@ class LockIn(toga.App):
         )        
         self.encrypt_popup.show()
         
+
+        
     def decrypt_popup_handler(self, *args, **kwargs):
+        """
+        Handler method to be called when double clicking a service in the table is pressed. 
+        This will bring up the decrypt popup
+        """
         service = self.selected_service
     
         self.decrypt_popup = toga.Window(title=service, size=(600, 200))
@@ -109,6 +119,7 @@ class LockIn(toga.App):
         self.decrypt_popup.show()
         
     def delete_popup_handler(self, *args, **kwargs):
+        """Handler method to be called when delete button is pressed. This will bring up the delete popup"""
         service = self.selected_service
     
         self.delete_popup = toga.Window(title=f"Delete {service}", size=(600, 200))
@@ -129,6 +140,7 @@ class LockIn(toga.App):
         self.delete_popup.show()
     
     def gen_service_table(self):
+        """Populate the service table with the latest data from the db"""
         self.main_window.content = toga.Table(
             style=Pack(font_size=100, font_family="Sans", font_weight="bold"),
             headings=["Services"],
@@ -138,12 +150,11 @@ class LockIn(toga.App):
             missing_value="N/A"
             )
 
+
     def startup(self):
         """
         The startup methods acts as the __call__ for a class inheriting from type: toga.aApp.
-        """
-        
-        self.actions = toga.Group("Actions")
+        """ 
         
         add_new = toga.Command(
             self.encrypt_popup_handler,
@@ -152,7 +163,16 @@ class LockIn(toga.App):
             icon="resources/add_new.png",
             group=self.actions,
             section="actions",
-            order=2
+            order=3
+        )
+        decrypt = toga.Command(
+            self.decrypt_popup_handler,
+            label="Decrypt",
+            tooltip="Decrypt selected service",
+            icon="resources/decrypt.png",
+            group=self.actions,
+            section="actions",
+            order=2,    
         )
         delete = toga.Command(
             self.delete_popup_handler,
@@ -166,8 +186,8 @@ class LockIn(toga.App):
         
         self.main_window = toga.MainWindow(title=self.formal_name, size=(600, 600))
         self.gen_service_table()
-        self.commands.add(add_new, delete)
-        self.main_window.toolbar.add(add_new, delete)
+        self.commands.add(add_new, delete, decrypt)
+        self.main_window.toolbar.add(add_new, delete, decrypt)
         self.main_window.show()
 
 

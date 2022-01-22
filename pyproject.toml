@@ -10,7 +10,7 @@ author_email = "julian@lockin.com"
 [tool.briefcase.app.lockin]
 formal_name = "LockIn"
 description = "Encrypted Credentials Manager"
-icon = "src/lockin/resources/lockin"
+icon = "src/lockin/resources/lock"
 sources = ['src/lockin']
 requires = [
     "peewee",

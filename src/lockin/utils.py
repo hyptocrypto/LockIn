@@ -1,5 +1,3 @@
-import os
-import sys
 import base64
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -20,7 +18,12 @@ class CredentialsManager:
         self._db.create_tables([Credentials])
         self._db.close()
         
-    def _gen_kdf(self):
+    def _gen_kdf(self) -> PBKDF2HMAC:
+        """
+        Fernet limits use encryption keys to a single use. 
+        This method will return a new kdf (key derivation function).
+        This way each encryption or decryption actions will use a new kdf. 
+        """
         return PBKDF2HMAC(
         algorithm = hashes.SHA256(),
         length =32, 
@@ -30,6 +33,10 @@ class CredentialsManager:
         )
         
     def _decrypt(self, service_name: str, encryption_password: str) -> Optional[Tuple[str, str]]:
+        """
+        Check for given service name in db, if found, try to decrypt it.
+        If decryption is successful, the username and password are returned
+        """
         #Test if service_name in in db
         try:
             self._db.connect()            
@@ -61,6 +68,9 @@ class CredentialsManager:
         service_username: str,
         service_password: str,
         encryption_password: str) -> Optional[Credentials]:
+        """
+        Use given :param encryption_password to encrypt the username and password, and save them to db under :param service_name
+        """
         try:
             self._db.connect()
             kdf = self._gen_kdf()
@@ -108,9 +118,14 @@ class CredentialsManager:
     def delete_service(self, service_name, encryption_password):
         try:
             username, password = self._decrypt(service_name, encryption_password)
-            delete =Credentials.delete().where(Credentials.service == service_name.lower())
-            delete.execute()
-            return True
+            if all([username, password]):
+                delete =Credentials.delete().where(Credentials.service == service_name.lower())
+                delete.execute()
+                return True
         except TypeError:
+            return
+        
+            return
+        
             return
         
