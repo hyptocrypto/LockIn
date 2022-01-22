@@ -151,6 +151,7 @@ class LockIn(toga.App):
             )
 
 
+
     def startup(self):
         """
         The startup methods acts as the __call__ for a class inheriting from type: toga.aApp.
@@ -169,6 +170,7 @@ class LockIn(toga.App):
             self.decrypt_popup_handler,
             label="Decrypt",
             tooltip="Decrypt selected service",
+            shortcut=toga.Key.ENTER,
             icon="resources/decrypt.png",
             group=self.actions,
             section="actions",
@@ -178,11 +180,14 @@ class LockIn(toga.App):
             self.delete_popup_handler,
             label='Delete',
             tooltip='Delete selected service',
+            shortcut=toga.Key.DELETE,
             icon="resources/delete.png",
             group=self.actions,
             section="actions",
             order=1
         )
+
+    
         
         self.main_window = toga.MainWindow(title=self.formal_name, size=(600, 600))
         self.gen_service_table()
