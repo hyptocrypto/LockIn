@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 from cryptography.fernet import InvalidToken
-from lockin.settings import DB_URI
+from lockin.settings import DB_URI, SALT
 from lockin.models import Credentials
 from lockin.exceptions import ServiceAlreadyExists, ServiceNotFound
 from peewee import SqliteDatabase
@@ -37,7 +37,7 @@ class CredentialsManager:
         return PBKDF2HMAC(
         algorithm = hashes.SHA256(),
         length =32, 
-        salt = b'Y\xa8B\x85\x8d\x95\xe1\xb9\x0e\x19\x11\x17\x03.\n\x9d',
+        salt = SALT,
         iterations = 100000,
         backend = default_backend()
         )
