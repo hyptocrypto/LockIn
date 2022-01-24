@@ -9,7 +9,7 @@ from lockin.models import Credentials
 from lockin.exceptions import ServiceAlreadyExists, ServiceNotFound
 from peewee import SqliteDatabase
 from typing import Optional, Tuple
-
+import shutil
 
 class CredentialsManager:
     """Main interface for interacting with the data layer"""
@@ -20,6 +20,14 @@ class CredentialsManager:
         self._db.create_tables([Credentials])
         self._db.close()
         
+    def shutdown(self, cls):
+        """
+        Make backup of db.
+        This method is called by the main toga apps on_exit method.
+        """
+        shutil.copy(DB_URI, f"{DB_URI}.backup")
+        return cls
+
     def _gen_kdf(self) -> PBKDF2HMAC:
         """
         Fernet limits use encryption keys to a single use. 

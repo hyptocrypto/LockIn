@@ -10,12 +10,13 @@ from lockin.styles import Styles
 from lockin.validators import not_null
 from lockin.exceptions import ServiceAlreadyExists
 
+
 class LockIn(toga.App):
     def __init__(self):
         self.manager = CredentialsManager()
         self.actions = toga.Group("Actions")
         self.selected_service = None
-        return super().__init__()
+        return super().__init__(on_exit=self.manager.shutdown)
     
     
     def set_selected_service(self, *args, **kwargs):
