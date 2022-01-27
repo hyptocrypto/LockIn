@@ -14,6 +14,7 @@ The only requirement for building LockIn locally is python3 & git. Then just clo
 ```
 git clone git@github.com:hyptocrypto/LockIn.git LockIn &&
 cd LockIn &&
+chmod + x install.sh &&
 /bin/bash install.sh
 ```
 
