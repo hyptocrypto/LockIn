@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 from cryptography.fernet import InvalidToken
-from lockin.settings import NETWORK_DB_URI, DB_URI, SALT
+from lockin.settings import NETWORK_SHARE_URI, NETWORK_DB_URI, DB_URI, SALT
 from lockin.models import Credentials, Connections, NetCredentials, NetConnections
 from lockin.exceptions import ServiceAlreadyExists, ServiceNotFound
 from peewee import SqliteDatabase
@@ -24,59 +24,66 @@ class CredentialsManager:
         self._db.create_tables([Credentials, Connections])
         self._db.close()
 
-        if os.path.exists(NETWORK_DB_URI):
+        # If host is connected to network share
+        if os.path.exists(NETWORK_SHARE_URI):
             self._network_db = SqliteDatabase(NETWORK_DB_URI)
-            self._network_db.connect()
-            self._network_db.create_tables([NetCredentials, NetConnections])
-            self._network_db.close()
+            with self._network_db:
+                self._network_db.create_tables([NetCredentials, NetConnections])
         else:
             self._network_db = None
 
-    def startup(self):
+        self._startup()
+
+    def _update_network_db(self):
+        """
+        Whenever we add or delete a record from the db,
+        we update the most recent connection and push the newly updated db file to the network share
+        """
+        Connections.create(timestamp=datetime.now())
+        if self._network_db:
+            shutil.copyfile(DB_URI, NETWORK_DB_URI)
+
+    def _startup(self):
         """
         When the app starts, check if the network share db exists (if on local network).
         If it does, compare the two db's, and treat the one with the most recent connection
-        as the master. If the network share is the master (most recently edited),
-        update the local db with the data from the master. Otherwise, update the network share k
+        as the master.
         """
         if self._network_db:
-            try:
-                self._network_db.connect()
-                last_network_db_connection = (
-                    NetConnections.select()
-                    .order_by(NetConnections.timestamp.desc())
-                    .get(NetConnections.timestamp)
+            with self._network_db:
+                last_network_db_connections = NetConnections.select().order_by(
+                    NetConnections.timestamp.desc()
                 )
-                self._network_db.close()
 
-                self._db.connect()
-                last_local_db_connection = (
-                    Connections.select()
-                    .order_by(Connections.timestamp.desc())
-                    .get(Connections.timestamp)
+                if len(last_network_db_connections):
+                    last_network_db_connection = last_network_db_connections[
+                        0
+                    ].timestamp
+                else:
+                    last_network_db_connection = None
+
+            with self._db:
+                last_local_db_connections = Connections.select().order_by(
+                    Connections.timestamp.desc()
                 )
-                self._db.close()
+                if len(last_local_db_connections):
+                    last_local_db_connection = last_local_db_connections[0].timestamp
+                else:
+                    last_local_db_connection = None
 
+            # If connections from local db and network db exists, compare and update the older db
+            if last_network_db_connection and last_local_db_connection:
                 if last_network_db_connection > last_local_db_connection:
                     shutil.copy(NETWORK_DB_URI, DB_URI)
-
-            finally:
-                self._network_db.close()
-                self._db.close()
+                if last_local_db_connection > last_network_db_connection:
+                    shutil.copy(DB_URI, NETWORK_DB_URI)
 
     def shutdown(self, cls):
         """
-        Update the most recent connection to the db, make a backup,
-        and update the network based database.
+        Make a local backup of the db file.
         This method is called by the main toga apps on_exit method.
         """
-        Connections.create(timestamp=datetime.now())
         shutil.copy(DB_URI, f"{DB_URI}.backup")
-
-        # If connected to local network, update network db.
-        if self._network_db:
-            shutil.copy(DB_URI, NETWORK_DB_URI)
-            shutil.copy(DB_URI, f"{NETWORK_DB_URI}.backup")
 
         return cls
 
@@ -151,11 +158,16 @@ class CredentialsManager:
             encrypted_password = f.encrypt(service_password.encode())
 
             # Create new entry in the db
-            return Credentials.create(
+            new_credentials = Credentials.create(
                 service=service_name,
                 username=encrypted_username,
                 password=encrypted_password,
             )
+            # If new credentials created, update the network db
+            if new_credentials:
+                self._update_network_db()
+                return new_credentials
+
         # Catch if something goes wrong
         # Pass the exception up so the app can handle if ServiceAlreadyExists exception is thrown
         except Exception as e:
@@ -194,6 +206,7 @@ class CredentialsManager:
                     Credentials.service == service_name.lower()
                 )
                 delete.execute()
+                self._update_network_db()
                 return True
         except TypeError:
             return

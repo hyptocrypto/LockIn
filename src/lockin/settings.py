@@ -3,6 +3,9 @@ import os
 # Name of DB owner
 HOST = "julian"
 
+# Location of network share
+NETWORK_SHARE_URI = "/Volumes/NAS/"
+
 # DB location if on a network share
 NETWORK_DB_URI = f"/Volumes/NAS/{HOST}_credentials.db"
 
