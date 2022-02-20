@@ -5,7 +5,7 @@ from tokenize import group
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW, CENTER 
-from lockin.utils import CredentialsManager
+from lockin.manager import CredentialsManager
 from lockin.styles import Styles
 from lockin.validators import not_null
 from lockin.exceptions import ServiceAlreadyExists

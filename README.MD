@@ -1,10 +1,11 @@
 # LockIn
+[![Tests](https://github.com/hyptocrypto/LockIn/actions/workflows/tests.yml/badge.svg)](https://github.com/hyptocrypto/LockIn/actions/workflows/tests.yml)
 
 
 **LockIn is a light-weight and encrypted credentials manager. The application implements EAR (encryption at rest) and is built as a cross platform native application using the [The BeeWare Project](https://beeware.org/). While only tested on macOS, the app should build on iOS, Windows, Linux and Android.**
 
 <kbd>
-<img width=350 src="readme/lockin_demo.png"/>
+<img width=350 src="docs/lockin_demo.png"/>
 </kbd>
 
 
@@ -24,7 +25,7 @@ sudo xattr -dr com.apple.quarantine /Applications/LockIn.app
 If the app still will not open, try setting it to launch with Rosetta.
 
 <kbd>
-<img src="readme/rosetta.png"/>
+<img src="docs/rosetta.png"/>
 </kbd>
 
 

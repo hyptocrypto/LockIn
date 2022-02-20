@@ -6,8 +6,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 from cryptography.fernet import InvalidToken
-from lockin.settings import NETWORK_SHARE_URI, NETWORK_DB_URI, DB_URI, SALT
-from lockin.models import Credentials, Connections, NetCredentials, NetConnections
+from lockin.settings import NETWORK_SHARE_URI, NETWORK_DB_URI, TESTING_DB_URI, DB_URI, SALT
+from lockin.models import Credentials, Connections, NetCredentials, NetConnections, TestCredentials, TestConnections
 from lockin.exceptions import ServiceAlreadyExists, ServiceNotFound
 from peewee import SqliteDatabase
 from typing import Optional, Tuple
@@ -17,29 +17,45 @@ import shutil
 class CredentialsManager:
     """Main interface for interacting with the data layer"""
 
-    def __init__(self):
-        # Init manager and db
-        self._db = SqliteDatabase(DB_URI)
-        self._db.connect()
-        self._db.create_tables([Credentials, Connections])
-        self._db.close()
-
-        # If host is connected to network share
-        if os.path.exists(NETWORK_SHARE_URI):
-            self._network_db = SqliteDatabase(NETWORK_DB_URI)
-            with self._network_db:
-                self._network_db.create_tables([NetCredentials, NetConnections])
-        else:
+    def __init__(self, testing=False):
+        """
+        The CredentialsManager can use up to three db files.
+        One for testing, one on a local network share to sync the db across devices on the same network,
+        and the main local file saved to the users home dir.
+        """
+        if testing:
+            self._db = SqliteDatabase(TESTING_DB_URI)
+            self.credentials = TestCredentials
+            self.connections = TestConnections
+            
+            with self._db:
+                self._db.create_tables([TestCredentials, TestConnections])
             self._network_db = None
+        else: 
+            # Init manager and db
+            self._db = SqliteDatabase(DB_URI)
+            self.credentials = Credentials
+            self.connections = Connections
+            with self._db:
+                self._db.create_tables([Credentials, Connections])
+            
 
-        self._startup()
+            # If host is connected to network share
+            if os.path.exists(NETWORK_SHARE_URI):
+                self._network_db = SqliteDatabase(NETWORK_DB_URI)
+                with self._network_db:
+                    self._network_db.create_tables([NetCredentials, NetConnections])
+            else:
+                self._network_db = None
+
+            self._startup()
 
     def _update_network_db(self):
         """
         Whenever we add or delete a record from the db,
         we update the most recent connection and push the newly updated db file to the network share
         """
-        Connections.create(timestamp=datetime.now())
+        self.connections.create(timestamp=datetime.now())
         if self._network_db:
             shutil.copyfile(DB_URI, NETWORK_DB_URI)
 
@@ -63,8 +79,8 @@ class CredentialsManager:
                     last_network_db_connection = None
 
             with self._db:
-                last_local_db_connections = Connections.select().order_by(
-                    Connections.timestamp.desc()
+                last_local_db_connections = self.connections.select().order_by(
+                    self.connections.timestamp.desc()
                 )
                 if len(last_local_db_connections):
                     last_local_db_connection = last_local_db_connections[0].timestamp
@@ -75,6 +91,7 @@ class CredentialsManager:
             if last_network_db_connection and last_local_db_connection:
                 if last_network_db_connection > last_local_db_connection:
                     shutil.copy(NETWORK_DB_URI, DB_URI)
+                    
                 if last_local_db_connection > last_network_db_connection:
                     shutil.copy(DB_URI, NETWORK_DB_URI)
 
@@ -111,8 +128,8 @@ class CredentialsManager:
         # Test if service_name in in db
         try:
             self._db.connect()
-            service = Credentials.get(Credentials.service == service_name.lower())
-        except Credentials.DoesNotExist:
+            service = self.credentials.get(self.credentials.service == service_name.lower())
+        except self.credentials.DoesNotExist:
             raise ServiceNotFound(f"Service {service_name} not found")
         finally:
             self._db.close()
@@ -149,7 +166,7 @@ class CredentialsManager:
             f = Fernet(
                 base64.urlsafe_b64encode(kdf.derive(encryption_password.encode()))
             )
-            service_list = [row.service for row in Credentials.select()]
+            service_list = [row.service for row in self.credentials.select()]
 
             if service_name in service_list:
                 raise ServiceAlreadyExists(f"Service {service_name} already exists.")
@@ -158,7 +175,7 @@ class CredentialsManager:
             encrypted_password = f.encrypt(service_password.encode())
 
             # Create new entry in the db
-            new_credentials = Credentials.create(
+            new_credentials = self.credentials.create(
                 service=service_name,
                 username=encrypted_username,
                 password=encrypted_password,
@@ -177,7 +194,7 @@ class CredentialsManager:
 
     def list_services(self):
         self._db.connect()
-        services = sorted([row.service.capitalize() for row in Credentials.select()])
+        services = sorted([row.service.capitalize() for row in self.credentials.select()])
         self._db.close()
         return services
 
@@ -202,8 +219,8 @@ class CredentialsManager:
         try:
             username, password = self._decrypt(service_name, encryption_password)
             if all([username, password]):
-                delete = Credentials.delete().where(
-                    Credentials.service == service_name.lower()
+                delete = self.credentials.delete().where(
+                    self.credentials.service == service_name.lower()
                 )
                 delete.execute()
                 self._update_network_db()
