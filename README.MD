@@ -11,6 +11,7 @@
 
 
 ## Install & Build
+Just edit the settings file (<b>src/lockin/settings.py</b>) by changing the HOST value to your name and the NETWORK_SHARE_UIR to the location of your shared network  storage. 
 The only requirement for building LockIn locally is python3. Then just run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install.
 ```
 /bin/bash install.sh
@@ -29,9 +30,11 @@ If the app still will not open, try setting it to launch with Rosetta.
 </kbd>
 
 
-## Future features
-- Configurable datastore options. Current default is an sqlite db sitting in the home dir of the user.
-- UI updates and more keybindings. (Some of this will need to be done in the Toga GUI toolkit source code)
+## Future development
+
+- [X] Local NAS based database sync. Keep same db synced across multiple devices
+- [] Configurable datastore options. Current default is an sqlite db sitting in the home dir of the user.
+- [] UI updates and more keybindings. (Some of this will need to be done in the Toga GUI toolkit source code)
 
 ## License
 The MIT License (MIT)
