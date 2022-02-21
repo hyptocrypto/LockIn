@@ -2,7 +2,7 @@
 [![Tests](https://github.com/hyptocrypto/LockIn/actions/workflows/tests.yml/badge.svg)](https://github.com/hyptocrypto/LockIn/actions/workflows/tests.yml)
 
 
-**LockIn is a light-weight and encrypted credentials manager. The application implements EAR (encryption at rest) and is built as a cross platform native application using the [The BeeWare Project](https://beeware.org/). While only tested on macOS, the app should build on iOS, Windows, Linux and Android.**
+**LockIn is a light-weight and encrypted password/credentials manager. The application implements EAR (encryption at rest) and is built as a cross platform native application using the [The BeeWare Project](https://beeware.org/). While only tested on macOS, the app should build on iOS, Windows, Linux and Android.**
 
 <kbd>
 <img width=350 src="docs/lockin_demo.png"/>
@@ -11,9 +11,12 @@
 
 
 ## Install & Build
-Just edit the settings file (<b>src/lockin/settings.py</b>) by changing the HOST value to your name and the NETWORK_SHARE_UIR to the location of your shared network  storage. 
-The only requirement for building LockIn locally is python3. Then just run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install.
+The only requirement for building LockIn locally is python3 & git. Then just clone the reop, cd in and run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install and the repo can be deleted.
+
 ```
+git clone git@github.com:hyptocrypto/LockIn.git LockIn &&
+cd LockIn &&
+chmod + x install.sh &&
 /bin/bash install.sh
 ```
 
