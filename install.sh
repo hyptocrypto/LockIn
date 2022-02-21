@@ -5,7 +5,7 @@ SETTINGS_FILE="src/lockin/settings.py"
 
 #User input
 read -p "Please enter your name: " HOST_NAME
-read -r -p "Please enter network shared folder location. Example: /Volumes/NAS/: " NETWORK_SHARE
+read -r -p "Please enter network shared folder location. Example: /Volumes/NAS/. Press enter to skip. " NETWORK_SHARE
 
 # Target strings to up date in settings file
 HOST_TARGET_KEY="HOST"
@@ -21,9 +21,10 @@ if ! python3 -c "import virtualenv" &> /dev/null; then
     python3 -m pip install --user virtualenv
 fi
 
-# Create  virtual env for python dependencies
+# Create  virtual env and install dependencies
 python3 -m virtualenv lockin_env
 source lockin_env/bin/activate
+pip install -r requirements.txt
 
 # Install briefcase
 pip install briefcase
