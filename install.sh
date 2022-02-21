@@ -26,9 +26,6 @@ python3 -m virtualenv lockin_env
 source lockin_env/bin/activate
 pip install -r requirements.txt
 
-#install deps
-pip install -r requirements.txt
-
 # Install briefcase
 pip install briefcase
 
