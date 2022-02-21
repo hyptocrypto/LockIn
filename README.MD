@@ -36,8 +36,8 @@ If the app still will not open, try setting it to launch with Rosetta.
 ## Future development
 
 - [X] Local NAS based database sync. Keep same db synced across multiple devices
-- [] Configurable datastore options. Current default is an sqlite db sitting in the home dir of the user.
-- [] UI updates and more keybindings. (Some of this will need to be done in the Toga GUI toolkit source code)
+- [ ] Configurable datastore options. Current default is an sqlite db sitting in the home dir of the user.
+- [ ] UI updates and more keybindings. (Some of this will need to be done in the Toga GUI toolkit source code)
 
 ## License
 The MIT License (MIT)
