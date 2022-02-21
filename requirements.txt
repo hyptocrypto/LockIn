@@ -28,3 +28,5 @@ toga-core==0.3.0.dev30
 toml==0.10.2
 travertino==0.1.3
 urllib3==1.26.8
+cryptography==36.0.1
+peewee==3.14.8

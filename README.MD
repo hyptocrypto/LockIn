@@ -1,16 +1,18 @@
 # LockIn
+[![Tests](https://github.com/hyptocrypto/LockIn/actions/workflows/tests.yml/badge.svg)](https://github.com/hyptocrypto/LockIn/actions/workflows/tests.yml)
 
 
 **LockIn is a light-weight and encrypted password/credentials manager. The application implements EAR (encryption at rest) and is built as a cross platform native application using the [The BeeWare Project](https://beeware.org/). While only tested on macOS, the app should build on iOS, Windows, Linux and Android.**
 
 <kbd>
-<img width=350 src="readme/lockin_demo.png"/>
+<img width=350 src="docs/lockin_demo.png"/>
 </kbd>
 
 
 
 ## Install & Build
 The only requirement for building LockIn locally is python3 & git. Then just clone the reop, cd in and run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install and the repo can be deleted.
+
 ```
 git clone git@github.com:hyptocrypto/LockIn.git LockIn &&
 cd LockIn &&
@@ -27,13 +29,15 @@ sudo xattr -dr com.apple.quarantine /Applications/LockIn.app
 If the app still will not open, try setting it to launch with Rosetta.
 
 <kbd>
-<img src="readme/rosetta.png"/>
+<img src="docs/rosetta.png"/>
 </kbd>
 
 
-## Future features
-- Configurable datastore options. Current default is an sqlite db sitting in the home dir of the user.
-- UI updates and more keybindings. (Some of this will need to be done in the Toga GUI toolkit source code)
+## Future development
+
+- [X] Local NAS based database sync. Keep same db synced across multiple devices
+- [] Configurable datastore options. Current default is an sqlite db sitting in the home dir of the user.
+- [] UI updates and more keybindings. (Some of this will need to be done in the Toga GUI toolkit source code)
 
 ## License
 The MIT License (MIT)
