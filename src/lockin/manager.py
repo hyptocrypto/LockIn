@@ -6,8 +6,21 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 from cryptography.fernet import InvalidToken
-from lockin.settings import NETWORK_SHARE_URI, NETWORK_DB_URI, TESTING_DB_URI, DB_URI, SALT
-from lockin.models import Credentials, Connections, NetCredentials, NetConnections, TestCredentials, TestConnections
+from lockin.settings import (
+    NETWORK_SHARE_URI,
+    NETWORK_DB_URI,
+    TESTING_DB_URI,
+    DB_URI,
+    SALT,
+)
+from lockin.models import (
+    Credentials,
+    Connections,
+    NetCredentials,
+    NetConnections,
+    TestCredentials,
+    TestConnections,
+)
 from lockin.exceptions import ServiceAlreadyExists, ServiceNotFound
 from peewee import SqliteDatabase
 from typing import Optional, Tuple
@@ -27,18 +40,17 @@ class CredentialsManager:
             self._db = SqliteDatabase(TESTING_DB_URI)
             self.credentials = TestCredentials
             self.connections = TestConnections
-            
+
             with self._db:
                 self._db.create_tables([TestCredentials, TestConnections])
             self._network_db = None
-        else: 
+        else:
             # Init manager and db
             self._db = SqliteDatabase(DB_URI)
             self.credentials = Credentials
             self.connections = Connections
             with self._db:
                 self._db.create_tables([Credentials, Connections])
-            
 
             # If host is connected to network share
             if os.path.exists(NETWORK_SHARE_URI):
@@ -91,7 +103,7 @@ class CredentialsManager:
             if last_network_db_connection and last_local_db_connection:
                 if last_network_db_connection > last_local_db_connection:
                     shutil.copy(NETWORK_DB_URI, DB_URI)
-                    
+
                 if last_local_db_connection > last_network_db_connection:
                     shutil.copy(DB_URI, NETWORK_DB_URI)
 
@@ -128,7 +140,9 @@ class CredentialsManager:
         # Test if service_name in in db
         try:
             self._db.connect()
-            service = self.credentials.get(self.credentials.service == service_name.lower())
+            service = self.credentials.get(
+                self.credentials.service == service_name.lower()
+            )
         except self.credentials.DoesNotExist:
             raise ServiceNotFound(f"Service {service_name} not found")
         finally:
@@ -168,7 +182,7 @@ class CredentialsManager:
             )
             service_list = [row.service for row in self.credentials.select()]
 
-            if service_name in service_list:
+            if service_name.lower() in service_list:
                 raise ServiceAlreadyExists(f"Service {service_name} already exists.")
 
             encrypted_username = f.encrypt(service_username.encode())
@@ -176,7 +190,7 @@ class CredentialsManager:
 
             # Create new entry in the db
             new_credentials = self.credentials.create(
-                service=service_name,
+                service=service_name.lower(),
                 username=encrypted_username,
                 password=encrypted_password,
             )
@@ -194,7 +208,9 @@ class CredentialsManager:
 
     def list_services(self):
         self._db.connect()
-        services = sorted([row.service.capitalize() for row in self.credentials.select()])
+        services = sorted(
+            [row.service.capitalize() for row in self.credentials.select()]
+        )
         self._db.close()
         return services
 
@@ -202,7 +218,10 @@ class CredentialsManager:
         self, service_name, service_username, service_password, encryption_password
     ):
         saved = self._encrypt(
-            service_name, service_username, service_password, encryption_password
+            service_name.lower(),
+            service_username,
+            service_password,
+            encryption_password,
         )
         if saved:
             return True
