@@ -1,5 +1,8 @@
 #! /bin/bash
 
+#Welcome!
+echo 'LockIn Installer'
+
 # Location of lockin settings file
 SETTINGS_FILE="src/lockin/settings.py"
 
