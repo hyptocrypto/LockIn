@@ -20,11 +20,27 @@ def fetch_service(client: CredentialsManager):
         print(
             CliStyles.credentials_resp_format.format(chosen_service, username, password)
         )
-        copy_to_clipboard(password)  # Add pass to clipboard for convenience
+        copy_to_clipboard(password)  # Add password to clipboard for convenience
     except TypeError:
         print(CliStyles.password_invalid.format(decryption_password))
     except ServiceNotFound:
         print(CliStyles.service_not_found.format(chosen_service))
+
+
+def new_service():
+    pass
+
+
+def delete_service():
+    pass
+
+
+def edit_service():
+    pass
+
+
+def list_services():
+    pass
 
 
 if __name__ == "__main__":
@@ -35,8 +51,9 @@ if __name__ == "__main__":
         print("\033[1A" + "\033[K", end="")  # Clear user input
         if action.lower() == "help":
             print(CliStyles.ascii_art)
+            continue
         if action.lower()[0] not in "fndleq":
-            print("Not a valid slection")
+            print(CliStyles.invalid_selection.format(action))
             continue
         match action.lower():
             case "f":

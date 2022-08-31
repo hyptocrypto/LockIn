@@ -1,3 +1,4 @@
+from site import check_enableusersite
 from toga.style import Pack
 from toga.style.pack import COLUMN, CENTER
 
@@ -22,30 +23,59 @@ class Styles:
     DECRYPT_LABEL_STYLE = Pack(font_size=20, padding_top=20, padding_left=153)
 
 
+class TermColors:
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+
 class CliStyles:
-    ascii_art = r"""
+    def _style_text(style: TermColors, text: str):
+        return f"{style}{text}{TermColors.ENDC}"
+
+    help_text = f"""
+    {_style_text(TermColors.UNDERLINE, "Fetch")} or {_style_text(TermColors.UNDERLINE, "F")} to fetch record
+    {_style_text(TermColors.UNDERLINE, "New")} or {_style_text(TermColors.UNDERLINE, "N")} to add new record
+    {_style_text(TermColors.UNDERLINE, "Delete")} or {_style_text(TermColors.UNDERLINE, "D")} to delete record
+    {_style_text(TermColors.UNDERLINE, "List")} or {_style_text(TermColors.UNDERLINE, "L")} to list all records
+    {_style_text(TermColors.UNDERLINE, "Edit")} or {_style_text(TermColors.UNDERLINE, "E")} to edit a record
+    """
+    ascii_art = (
+        r"""
         __               __   ____    
        / /   ____  _____/ /__/  _/___ 
       / /   / __ \/ ___/ //_// // __ \
      / /___/ /_/ / /__/ ,< _/ // / / /
     /_____/\____/\___/_/|_/___/_/ /_/
    ----------------------------------
-    
-    Fetch or F to fetch record
-    New or N to add a new record
-    Delete or D to delete a record
-    List or L to list all records
-    Edit or E to edit a record
     """
+        + help_text
+    )
 
-    credentials_resp_format = """
-    \n
-    <<<<<<<<<<-------------->>>>>>>>>>
-    Service: {}\n
-    Username: {}\n
-    Password: {}
-    <<<<<<<<<<-------------->>>>>>>>>>
-    \n
+    credentials_resp_format = (
+        f"{_style_text(TermColors.OKBLUE, "<<<<<<<<<<-------------->>>>>>>>>>")}"
+        +
+        """
+        \n
+        Service: {}\n
+        Username: {}\n
+        Password: {}
+        \n
+        """
+        +
+        f"{_style_text(TermColors.OKBLUE, "<<<<<<<<<<-------------->>>>>>>>>>")}"
+        )
+
+    invalid_selection = f"""
+    {_style_text(TermColors.FAIL, "------------------------------\n")}
+    Error: Selection '{}' is not valid.\n
+    {_style_text(TermColors.FAIL, "------------------------------\n")}
     """
 
     service_name_prompt = """
@@ -56,20 +86,20 @@ class CliStyles:
     Enter Decryption Password: 
     """
 
-    service_not_found = """
-    ------------------------------\n
+    service_not_found = f"""
+    {_style_text(TermColors.FAIL, "------------------------------\n")}
     Error: Service '{}' not found.\n
-    ------------------------------\n
+    {_style_text(TermColors.FAIL, "------------------------------\n")}
     """
 
-    service_already_exists = """
-    ------------------------------\n
+    service_already_exists = f"""
+    {_style_text(TermColors.FAIL, "------------------------------\n")}
     Error: Service '{}' already exists.\n
-    ------------------------------\n
+    {_style_text(TermColors.FAIL, "------------------------------\n")}
     """
 
-    password_invalid = """
-    ------------------------------\n
+    password_invalid = f"""
+    {_style_text(TermColors.FAIL, "------------------------------\n")}
     Error: Password '{}' is invalid.\n
-    ------------------------------\n
+    {_style_text(TermColors.FAIL, "------------------------------\n")}
     """
