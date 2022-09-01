@@ -1,0 +1,6 @@
+cffi==1.15.1
+cryptography==37.0.4
+peewee==3.15.2
+prompt-toolkit==3.0.30
+pycparser==2.21
+wcwidth==0.2.5
