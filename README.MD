@@ -21,12 +21,12 @@ cd LockIn &&
 Install App
 ```
 chmod + x install_app.sh &&
-/bin/bash install_app.sh
+/bin/zsh install_app.sh
 ```
 Install CLI
 ```
 chmod + x install_cli.sh &&
-/bin/bash install_cli.sh
+/bin/zsh install_cli.sh
 ```
 
 #### Troubleshooting
