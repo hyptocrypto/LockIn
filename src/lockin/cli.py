@@ -1,9 +1,11 @@
+#!venv/bin/python
+
 import os
 import subprocess
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
 from manager import CredentialsManager
-from styles import CliStyles, prompt_factory_danger, prompt_factory_warn
+from cli_styles import CliStyles, prompt_factory_danger, prompt_factory_warn
 from exceptions import ServiceNotFound
 
 
