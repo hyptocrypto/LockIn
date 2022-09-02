@@ -13,11 +13,20 @@
 ## Install & Build
 The only requirement for building LockIn locally is python3 & git. Then just clone the reop, cd in and run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install and the repo can be deleted.
 
+Clone Repo
 ```
 git clone git@github.com:hyptocrypto/LockIn.git LockIn &&
 cd LockIn &&
-chmod + x install.sh &&
-/bin/bash install.sh
+```
+Install App
+```
+chmod + x install_app.sh &&
+/bin/zsh install_app.sh
+```
+Install CLI
+```
+chmod + x install_cli.sh &&
+/bin/zsh install_cli.sh
 ```
 
 #### Troubleshooting

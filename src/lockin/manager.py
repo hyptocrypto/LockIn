@@ -6,14 +6,14 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 from cryptography.fernet import InvalidToken
-from lockin.settings import (
+from settings import (
     NETWORK_SHARE_URI,
     NETWORK_DB_URI,
     TESTING_DB_URI,
     DB_URI,
     SALT,
 )
-from lockin.models import (
+from models import (
     Credentials,
     Connections,
     NetCredentials,
@@ -21,7 +21,7 @@ from lockin.models import (
     TestCredentials,
     TestConnections,
 )
-from lockin.exceptions import ServiceAlreadyExists, ServiceNotFound
+from exceptions import ServiceAlreadyExists, ServiceNotFound
 from peewee import SqliteDatabase
 from typing import Optional, Tuple
 import shutil

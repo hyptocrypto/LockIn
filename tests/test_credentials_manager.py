@@ -1,6 +1,6 @@
 import pytest
-from lockin.manager import CredentialsManager
-from lockin.exceptions import ServiceAlreadyExists
+from manager import CredentialsManager
+from exceptions import ServiceAlreadyExists
 
 test_credentials_manager = CredentialsManager(testing=True)
 
