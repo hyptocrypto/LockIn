@@ -1,4 +1,4 @@
-# #! /bin/zsh
+#! /bin/bash 
 
 # # Location of lockin settings file
 # SETTINGS_FILE="src/lockin/settings.py"

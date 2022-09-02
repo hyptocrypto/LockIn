@@ -1,4 +1,4 @@
-from src.lockin.settings import TESTING_DB_URI
+from settings import TESTING_DB_URI
 import os
 import pytest
 

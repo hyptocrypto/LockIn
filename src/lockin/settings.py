@@ -1,10 +1,10 @@
 import os
 
 # Name of DB owner
-HOST = 'julian'
+HOST = ''
 
 # Location of network share
-NETWORK_SHARE_URI = '/Volumes/NAS/'
+NETWORK_SHARE_URI = ''
 
 # DB location if on a network share
 NETWORK_DB_URI = os.path.join(NETWORK_SHARE_URI, f"{HOST}_credentials.db")
