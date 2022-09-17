@@ -95,7 +95,7 @@ if __name__ == "__main__":
     while True:
         action = prompt("")
         print("\033[1A" + "\033[K", end="")  # Clear user input
-        if action.lower()[0] not in "fndleqc":
+        if action and action.lower()[0] not in "fndleqc":
             print(CliStyles.invalid_selection.format(action))
             continue
         match action.lower():
