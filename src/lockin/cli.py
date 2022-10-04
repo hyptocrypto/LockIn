@@ -87,9 +87,11 @@ def edit_service(client: CredentialsManager):
 def list_services(client: CredentialsManager):
     CliStyles.list_services(client.list_services())
 
+def clear():
+    os.system("clear")
+    print(CliStyles.ascii_art)
 
 if __name__ == "__main__":
-    os.system("")
     client = CredentialsManager()
     print(CliStyles.ascii_art)
     while True:
@@ -101,21 +103,25 @@ if __name__ == "__main__":
         match action.lower():
             case "f":
                 try:
+                    clear()
                     fetch_service(client)
                 except KeyboardInterrupt:
                     pass
             case "n":
                 try:
+                    clear()
                     new_service(client)
                 except KeyboardInterrupt:
                     pass
             case "e":
                 try:
+                    clear()
                     edit_service(client)
                 except KeyboardInterrupt:
                     pass
             case "d":
                 try:
+                    clear()
                     delete_service(client)
                 except KeyboardInterrupt:
                     pass
@@ -123,6 +129,7 @@ if __name__ == "__main__":
                 os.system("clear")
                 print(CliStyles.ascii_art)
             case "l":
+                clear()
                 list_services(client)
             case "q":
                 break
