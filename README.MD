@@ -11,7 +11,7 @@
 
 
 ## Install & Build
-To build the Lockin app or cli localy, python3, git, and hombrew are required. Then just clone the reop, run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install and the repo can be deleted.
+To build the Lockin app or cli locally, python3, git, and hombrew are required. Then just clone the reop, run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install and the repo can be deleted.
 
 Clone Repo
 ```
