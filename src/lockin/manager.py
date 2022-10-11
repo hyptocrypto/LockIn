@@ -21,6 +21,7 @@ from models import (
     TestCredentials,
     TestConnections,
 )
+from smb import SMBClient
 from exceptions import ServiceAlreadyExists, ServiceNotFound
 from peewee import SqliteDatabase
 from typing import Optional, Tuple
@@ -67,9 +68,10 @@ class CredentialsManager:
         Whenever we add or delete a record from the db,
         we update the most recent connection and push the newly updated db file to the network share
         """
-        self.connections.create(timestamp=datetime.now())
-        if self._network_db:
+        "NOTE: Use new smb client"
+        with SMBClient():
             shutil.copyfile(DB_URI, NETWORK_DB_URI)
+            self.connections.create(timestamp=datetime.now())
 
     def _startup(self):
         """
