@@ -22,7 +22,11 @@ from models import (
     TestConnections,
 )
 from smb import SMBClient
-from exceptions import ServiceAlreadyExists, ServiceNotFound
+from exceptions import (
+    ServiceAlreadyExists,
+    ServiceNotFound,
+    NetworkShareConnectionError,
+)
 from peewee import SqliteDatabase
 from typing import Optional, Tuple
 import shutil
@@ -53,13 +57,11 @@ class CredentialsManager:
             with self._db:
                 self._db.create_tables([Credentials, Connections])
 
-            # If host is connected to network share
-            if os.path.exists(NETWORK_SHARE_URI):
-                self._network_db = SqliteDatabase(NETWORK_DB_URI)
+            self._network_db = SqliteDatabase(NETWORK_DB_URI)
+            # If host is connected to network share, sanity check to create tables.
+            if os.path.ismount(NETWORK_SHARE_URI):
                 with self._network_db:
                     self._network_db.create_tables([NetCredentials, NetConnections])
-            else:
-                self._network_db = None
 
             self._startup()
 
@@ -79,35 +81,41 @@ class CredentialsManager:
         If it does, compare the two db's, and treat the one with the most recent connection
         as the master.
         """
-        if self._network_db:
-            with self._network_db:
-                last_network_db_connections = NetConnections.select().order_by(
-                    NetConnections.timestamp.desc()
-                )
+        try:
+            with SMBClient():
+                with self._network_db:
+                    last_network_db_connections = NetConnections.select().order_by(
+                        NetConnections.timestamp.desc()
+                    )
 
-                if len(last_network_db_connections):
-                    last_network_db_connection = last_network_db_connections[
-                        0
-                    ].timestamp
-                else:
-                    last_network_db_connection = None
+                    if last_network_db_connections.exists():
+                        last_network_db_connection = (
+                            last_network_db_connections.first().timestamp
+                        )
+                    else:
+                        last_network_db_connection = None
 
-            with self._db:
-                last_local_db_connections = self.connections.select().order_by(
-                    self.connections.timestamp.desc()
-                )
-                if len(last_local_db_connections):
-                    last_local_db_connection = last_local_db_connections[0].timestamp
-                else:
-                    last_local_db_connection = None
+                with self._db:
+                    last_local_db_connections = self.connections.select().order_by(
+                        self.connections.timestamp.desc()
+                    )
+                    if last_local_db_connections.exists():
+                        last_local_db_connection = (
+                            last_local_db_connections.first().timestamp
+                        )
+                    else:
+                        last_local_db_connection = None
 
-            # If connections from local db and network db exists, compare and update the older db
-            if last_network_db_connection and last_local_db_connection:
-                if last_network_db_connection > last_local_db_connection:
-                    shutil.copy(NETWORK_DB_URI, DB_URI)
+                # If connections from local db and network db exists, compare and update the older db
+                if last_network_db_connection and last_local_db_connection:
+                    breakpoint()
+                    if last_network_db_connection > last_local_db_connection:
+                        shutil.copy(NETWORK_DB_URI, DB_URI)
 
-                if last_local_db_connection > last_network_db_connection:
-                    shutil.copy(DB_URI, NETWORK_DB_URI)
+                    if last_network_db_connection < last_local_db_connection:
+                        shutil.copy(DB_URI, NETWORK_DB_URI)
+        except NetworkShareConnectionError:
+            pass
 
     def shutdown(self, cls):
         """

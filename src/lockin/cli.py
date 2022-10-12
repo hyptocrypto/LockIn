@@ -87,12 +87,15 @@ def edit_service(client: CredentialsManager):
 def list_services(client: CredentialsManager):
     CliStyles.list_services(client.list_services())
 
+
 def clear():
     os.system("clear")
     print(CliStyles.ascii_art)
 
+
 if __name__ == "__main__":
     client = CredentialsManager()
+    os.system("clear")
     print(CliStyles.ascii_art)
     while True:
         action = prompt("")

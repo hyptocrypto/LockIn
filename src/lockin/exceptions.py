@@ -4,3 +4,7 @@ class ServiceAlreadyExists(Exception):
 
 class ServiceNotFound(Exception):
     pass
+
+
+class NetworkShareConnectionError(Exception):
+    pass

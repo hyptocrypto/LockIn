@@ -1,5 +1,7 @@
 import os
+import subprocess
 from settings import PASSWORD, NAS_HOST, NETWORK_SHARE_URI
+from exceptions import NetworkShareConnectionError
 
 
 class SMBClient:
@@ -18,13 +20,28 @@ class SMBClient:
 
         # Create NETWORK_SHARE_URI dir if needed
         if not os.path.isdir(NETWORK_SHARE_URI):
-            os.system("echo %s|sudo -S %s" % (PASSWORD, f"mkdir {NETWORK_SHARE_URI}"))
+            subprocess.run(
+                "echo %s|sudo -S %s" % (PASSWORD, f"mkdir {NETWORK_SHARE_URI}"),
+                shell=True,
+                timeout=5,
+            )
 
         # Mount share
-        os.system(
-            "echo %s|sudo -S %s"
-            % (PASSWORD, f"mount_smbfs {NAS_HOST} {NETWORK_SHARE_URI}")
-        )
+        print("Checking for network share.")
+        try:
+            subprocess.run(
+                "echo %s|sudo -S %s"
+                % (PASSWORD, f"mount_smbfs {NAS_HOST} {NETWORK_SHARE_URI}"),
+                shell=True,
+                timeout=5,
+            )
+        except subprocess.TimeoutExpired:
+            pass
+
+        if not os.path.ismount(NETWORK_SHARE_URI):
+            raise NetworkShareConnectionError(
+                f"Net work share not mounted at location: '{NETWORK_SHARE_URI}'"
+            )
 
         return self
 
@@ -32,10 +49,14 @@ class SMBClient:
         """ "Check if network share was pre-mounted. If not, unmount"""
         if self.pre_connected:
             return
-        os.system("echo %s|sudo -S %s" % (PASSWORD, f"umount {NETWORK_SHARE_URI}"))
+        subprocess.run(
+            "echo %s|sudo -S %s" % (PASSWORD, f"umount {NETWORK_SHARE_URI}"),
+            shell=True,
+            timeout=5,
+        )
 
 
 # TESTING BLOCK
 if __name__ == "__main__":
     with SMBClient() as cliient:
-        os.system("echo %s|sudo -S %s" % (PASSWORD, f"ls {NETWORK_SHARE_URI}"))
+        subprocess.run("echo %s|sudo -S %s" % (PASSWORD, f"ls {NETWORK_SHARE_URI}"))
