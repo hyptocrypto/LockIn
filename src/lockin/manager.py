@@ -67,15 +67,15 @@ class CredentialsManager:
 
     def _update_network_db(self):
         """
-        Whenever we add or delete a record from the db,
-        we update the most recent connection and push the newly updated db file to the network share
+        Whenever adding or deleting a record from the db,
+        we update the connections table and push the newly updated db file to the network share
         """
         self.connections.create(timestamp=datetime.now())
-        with SMBClient():
-            try:
+        try:
+            with SMBClient():
                 shutil.copyfile(DB_URI, NETWORK_DB_URI)
-            except NetworkShareConnectionError:
-                pass
+        except NetworkShareConnectionError:
+            pass
 
     def _startup(self):
         """
