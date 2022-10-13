@@ -13,28 +13,36 @@ class SMBClient:
     def __init__(self):
         self.pre_connected = os.path.ismount(NETWORK_SHARE_URI)
 
+    def _run_cmd(self, cmd):
+        res = subprocess.run(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            shell=True,
+            timeout=5,
+        )
+        ()
+
     def __enter__(self):
         """Check if network share is already mounted. If not mount the share"""
         if self.pre_connected:
             return self
+        if not PASSWORD:
+            raise NetworkShareConnectionError(f"Sudo password missing.")
 
         # Create NETWORK_SHARE_URI dir if needed
         if not os.path.isdir(NETWORK_SHARE_URI):
-            subprocess.run(
-                "echo %s|sudo -S %s" % (PASSWORD, f"mkdir {NETWORK_SHARE_URI}"),
-                shell=True,
-                timeout=5,
-            )
+            mkdir_cmd = "echo %s|sudo -S %s" % (PASSWORD, f"mkdir {NETWORK_SHARE_URI}")
+            self._run_cmd(mkdir_cmd)
 
         # Mount share
-        print("Checking for network share.")
         try:
-            subprocess.run(
-                "echo %s|sudo -S %s"
-                % (PASSWORD, f"mount_smbfs {NAS_HOST} {NETWORK_SHARE_URI}"),
-                shell=True,
-                timeout=5,
+            mount_cmd = "echo %s|sudo -S %s" % (
+                PASSWORD,
+                f"mount_smbfs {NAS_HOST} {NETWORK_SHARE_URI}",
             )
+            self._run_cmd(mount_cmd)
+
         except subprocess.TimeoutExpired:
             pass
 
@@ -49,11 +57,8 @@ class SMBClient:
         """ "Check if network share was pre-mounted. If not, unmount"""
         if self.pre_connected:
             return
-        subprocess.run(
-            "echo %s|sudo -S %s" % (PASSWORD, f"umount {NETWORK_SHARE_URI}"),
-            shell=True,
-            timeout=5,
-        )
+        unmount_cmd = "echo %s|sudo -S %s" % (PASSWORD, f"umount {NETWORK_SHARE_URI}")
+        self._run_cmd(unmount_cmd)
 
 
 # TESTING BLOCK

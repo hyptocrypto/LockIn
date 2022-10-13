@@ -70,10 +70,12 @@ class CredentialsManager:
         Whenever we add or delete a record from the db,
         we update the most recent connection and push the newly updated db file to the network share
         """
-        "NOTE: Use new smb client"
+        self.connections.create(timestamp=datetime.now())
         with SMBClient():
-            shutil.copyfile(DB_URI, NETWORK_DB_URI)
-            self.connections.create(timestamp=datetime.now())
+            try:
+                shutil.copyfile(DB_URI, NETWORK_DB_URI)
+            except NetworkShareConnectionError:
+                pass
 
     def _startup(self):
         """
@@ -83,6 +85,7 @@ class CredentialsManager:
         """
         try:
             with SMBClient():
+                ()
                 with self._network_db:
                     last_network_db_connections = NetConnections.select().order_by(
                         NetConnections.timestamp.desc()
@@ -108,7 +111,7 @@ class CredentialsManager:
 
                 # If connections from local db and network db exists, compare and update the older db
                 if last_network_db_connection and last_local_db_connection:
-                    breakpoint()
+                    ()
                     if last_network_db_connection > last_local_db_connection:
                         shutil.copy(NETWORK_DB_URI, DB_URI)
 

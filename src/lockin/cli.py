@@ -95,7 +95,6 @@ def clear():
 
 if __name__ == "__main__":
     client = CredentialsManager()
-    os.system("clear")
     print(CliStyles.ascii_art)
     while True:
         action = prompt("")
