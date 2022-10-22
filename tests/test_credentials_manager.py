@@ -15,13 +15,22 @@ def test_encrypt_and_decrypt():
     assert password == "test_password"
 
 
+def test_edit():
+    res = test_credentials_manager.edit_service(
+        **mock_service.query_props,
+        update_username="new_test_name",
+        update_password="new_test_password"
+    )
+    edited_username, edited_password = test_credentials_manager.fetch_service(
+        **mock_service.query_props
+    )
+    assert edited_username == "new_test_name"
+    assert edited_password == "new_test_password"
+
+
 def test_duplicate_service():
     with pytest.raises(DuplicateServiceError):
         test_credentials_manager.save_service(**mock_service.save_props)
-
-
-def test_update():
-    pass
 
 
 def test_delete():

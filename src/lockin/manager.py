@@ -237,17 +237,34 @@ class CredentialsManager:
         except TypeError:
             return
 
-    def edit_service(self, service_name, encryption_password):
-        pass
+    def edit_service(
+        self,
+        service_name,
+        encryption_password,
+        update_username,
+        update_password,
+    ):
+        service_name = service_name.lower()
+        username, password = self._decrypt(service_name, encryption_password)
+        if username and password:
+            self.credentials.delete().where(
+                self.credentials.service == service_name.lower()
+            ).execute()
+            saved = self._encrypt(
+                service_name.lower(),
+                update_username or username,
+                update_password or password,
+                encryption_password,
+            )
+            return saved
 
     def delete_service(self, service_name, encryption_password):
         try:
             username, password = self._decrypt(service_name, encryption_password)
             if all([username, password]):
-                delete = self.credentials.delete().where(
+                self.credentials.delete().where(
                     self.credentials.service == service_name.lower()
-                )
-                delete.execute()
+                ).execute()
                 self.connections.create(timestamp=datetime.now())
                 self._update_network_db()
                 return True
