@@ -14,14 +14,13 @@ class SMBClient:
         self.pre_connected = os.path.ismount(NETWORK_SHARE_URI)
 
     def _run_cmd(self, cmd):
-        res = subprocess.run(
+        subprocess.run(
             cmd,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             shell=True,
             timeout=5,
         )
-        ()
 
     def __enter__(self):
         """Check if network share is already mounted. If not mount the share"""
