@@ -1,4 +1,3 @@
-from __future__ import with_statement
 import os
 import subprocess
 from settings import PASSWORD, NAS_HOST, NETWORK_SHARE_URI
