@@ -1,4 +1,4 @@
-class ServiceAlreadyExists(Exception):
+class DuplicateServiceError(Exception):
     pass
 
 

@@ -82,6 +82,8 @@ def edit_service(client: CredentialsManager):
         )
         if saved:
             print(CliStyles.edit_success_resp.format(new_service_name))
+    else:
+        print("Error")
 
 
 def list_services(client: CredentialsManager):

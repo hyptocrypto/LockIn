@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import os
 import subprocess
 from settings import PASSWORD, NAS_HOST, NETWORK_SHARE_URI
@@ -6,8 +7,7 @@ from exceptions import NetworkShareConnectionError
 
 class SMBClient:
     """
-    Main connector for network volumes
-    TODO: Add some edge case / error handling for if sys calls fail
+    Context manager to handle the connection and disconnection of network volumes
     """
 
     def __init__(self):
@@ -61,7 +61,24 @@ class SMBClient:
         self._run_cmd(unmount_cmd)
 
 
+def with_smb(func):
+    """Decorator to call functions within an SMBClient try except block"""
+
+    def wrap(*args):
+        try:
+            with SMBClient():
+                func(*args)
+        except NetworkShareConnectionError:
+            pass
+
+    return wrap
+
+
 # TESTING BLOCK
 if __name__ == "__main__":
-    with SMBClient() as cliient:
-        subprocess.run("echo %s|sudo -S %s" % (PASSWORD, f"ls {NETWORK_SHARE_URI}"))
+
+    @with_smb
+    def test():
+        breakpoint()
+
+    test()
