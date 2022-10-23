@@ -241,8 +241,9 @@ class CredentialsManager:
         self,
         service_name,
         encryption_password,
-        update_username,
-        update_password,
+        update_name=None,
+        update_username=None,
+        update_password=None,
     ):
         service_name = service_name.lower()
         username, password = self._decrypt(service_name, encryption_password)
@@ -251,12 +252,14 @@ class CredentialsManager:
                 self.credentials.service == service_name.lower()
             ).execute()
             saved = self._encrypt(
-                service_name.lower(),
+                (update_name or service_name).lower(),
                 update_username or username,
                 update_password or password,
                 encryption_password,
             )
             return saved
+        else:
+            print("Error")
 
     def delete_service(self, service_name, encryption_password):
         try:
