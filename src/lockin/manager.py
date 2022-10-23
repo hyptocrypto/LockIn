@@ -21,7 +21,12 @@ from models import (
     TestCredentials,
     TestConnections,
 )
-from exceptions import ServiceAlreadyExists, ServiceNotFound
+from smb import with_smb
+from exceptions import (
+    DuplicateServiceError,
+    ServiceNotFound,
+    NetworkShareConnectionError,
+)
 from peewee import SqliteDatabase
 from typing import Optional, Tuple
 import shutil
@@ -52,60 +57,58 @@ class CredentialsManager:
             with self._db:
                 self._db.create_tables([Credentials, Connections])
 
-            # If host is connected to network share
-            if os.path.exists(NETWORK_SHARE_URI):
-                self._network_db = SqliteDatabase(NETWORK_DB_URI)
+            self._network_db = SqliteDatabase(NETWORK_DB_URI)
+            # If host is connected to network share, sanity check to create tables.
+            if os.path.ismount(NETWORK_SHARE_URI):
                 with self._network_db:
                     self._network_db.create_tables([NetCredentials, NetConnections])
-            else:
-                self._network_db = None
 
             self._startup()
 
+    @with_smb
     def _update_network_db(self):
         """
-        Whenever we add or delete a record from the db,
-        we update the most recent connection and push the newly updated db file to the network share
+        Whenever adding or deleting a record from the db,
+        we update the connections table and push the newly updated db file to the network share
         """
-        self.connections.create(timestamp=datetime.now())
-        if self._network_db:
-            shutil.copyfile(DB_URI, NETWORK_DB_URI)
+        shutil.copyfile(DB_URI, NETWORK_DB_URI)
 
+    @with_smb
     def _startup(self):
         """
         When the app starts, check if the network share db exists (if on local network).
         If it does, compare the two db's, and treat the one with the most recent connection
         as the master.
         """
-        if self._network_db:
-            with self._network_db:
-                last_network_db_connections = NetConnections.select().order_by(
-                    NetConnections.timestamp.desc()
+        with self._network_db:
+            last_network_db_connections = NetConnections.select().order_by(
+                NetConnections.timestamp.desc()
+            )
+
+            if last_network_db_connections.exists():
+                last_network_db_connection = (
+                    last_network_db_connections.first().timestamp
                 )
+            else:
+                last_network_db_connection = None
 
-                if len(last_network_db_connections):
-                    last_network_db_connection = last_network_db_connections[
-                        0
-                    ].timestamp
-                else:
-                    last_network_db_connection = None
+        with self._db:
+            last_local_db_connections = self.connections.select().order_by(
+                self.connections.timestamp.desc()
+            )
+            if last_local_db_connections.exists():
+                last_local_db_connection = last_local_db_connections.first().timestamp
+            else:
+                last_local_db_connection = None
 
-            with self._db:
-                last_local_db_connections = self.connections.select().order_by(
-                    self.connections.timestamp.desc()
-                )
-                if len(last_local_db_connections):
-                    last_local_db_connection = last_local_db_connections[0].timestamp
-                else:
-                    last_local_db_connection = None
+        # If connections from local db and network db exists, compare and update the older db
+        if last_network_db_connection and last_local_db_connection:
+            ()
+            if last_network_db_connection > last_local_db_connection:
+                shutil.copy(NETWORK_DB_URI, DB_URI)
 
-            # If connections from local db and network db exists, compare and update the older db
-            if last_network_db_connection and last_local_db_connection:
-                if last_network_db_connection > last_local_db_connection:
-                    shutil.copy(NETWORK_DB_URI, DB_URI)
-
-                if last_local_db_connection > last_network_db_connection:
-                    shutil.copy(DB_URI, NETWORK_DB_URI)
+            if last_network_db_connection < last_local_db_connection:
+                shutil.copy(DB_URI, NETWORK_DB_URI)
 
     def shutdown(self, cls):
         """
@@ -183,7 +186,7 @@ class CredentialsManager:
             service_list = [row.service for row in self.credentials.select()]
 
             if service_name.lower() in service_list:
-                raise ServiceAlreadyExists(f"Service {service_name} already exists.")
+                raise DuplicateServiceError(f"Service {service_name} already exists.")
 
             encrypted_username = f.encrypt(service_username.encode())
             encrypted_password = f.encrypt(service_password.encode())
@@ -196,11 +199,11 @@ class CredentialsManager:
             )
             # If new credentials created, update the network db
             if new_credentials:
+                self.connections.create(timestamp=datetime.now())
                 self._update_network_db()
                 return new_credentials
 
         # Catch if something goes wrong
-        # Pass the exception up so the app can handle if ServiceAlreadyExists exception is thrown
         except Exception as e:
             raise e
         finally:
@@ -234,14 +237,38 @@ class CredentialsManager:
         except TypeError:
             return
 
+    def edit_service(
+        self,
+        service_name,
+        encryption_password,
+        update_name=None,
+        update_username=None,
+        update_password=None,
+    ):
+        service_name = service_name.lower()
+        username, password = self._decrypt(service_name, encryption_password)
+        if username and password:
+            self.credentials.delete().where(
+                self.credentials.service == service_name.lower()
+            ).execute()
+            saved = self._encrypt(
+                (update_name or service_name).lower(),
+                update_username or username,
+                update_password or password,
+                encryption_password,
+            )
+            return saved
+        else:
+            print("Error")
+
     def delete_service(self, service_name, encryption_password):
         try:
             username, password = self._decrypt(service_name, encryption_password)
             if all([username, password]):
-                delete = self.credentials.delete().where(
+                self.credentials.delete().where(
                     self.credentials.service == service_name.lower()
-                )
-                delete.execute()
+                ).execute()
+                self.connections.create(timestamp=datetime.now())
                 self._update_network_db()
                 return True
         except TypeError:

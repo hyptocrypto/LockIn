@@ -145,13 +145,13 @@ class CliStyles:
     """
 
     edit_service_name_prompt = """
-    Enter New Service Name: 
+    Enter New Service Name (Enter to leave unchanged): 
     """
     edit_username_prompt = """
-    Enter New Service Username: 
+    Enter New Service Username (Enter to leave unchanged): 
     """
     edit_password_prompt = """
-    Enter New Service Password: 
+    Enter New Service Password (Enter to leave unchanged): 
     """
 
     service_name_edit_prompt = """

@@ -67,29 +67,36 @@ def edit_service(client: CredentialsManager):
         CliStyles.service_name_edit_prompt, completer=services
     )
     encryption_password = prompt(CliStyles.decryption_pass_prompt)
-    deleted = client.delete_service(
-        service_name=service_name, encryption_password=encryption_password
-    )
-    if deleted:
-        new_service_name = prompt(CliStyles.edit_service_name_prompt)
-        username = prompt(CliStyles.edit_username_prompt)
-        password = prompt(CliStyles.edit_password_prompt)
-        saved = client.save_service(
-            service_name=new_service_name,
-            service_username=username,
-            service_password=password,
+    new_service_name = prompt(CliStyles.edit_service_name_prompt)
+    new_service_username = prompt(CliStyles.edit_username_prompt)
+    new_service_password = prompt(CliStyles.edit_password_prompt)
+    try:
+        edited = client.edit_service(
+            service_name=service_name,
             encryption_password=encryption_password,
+            update_name=new_service_name,
+            update_username=new_service_username,
+            update_password=new_service_password,
         )
-        if saved:
-            print(CliStyles.edit_success_resp.format(new_service_name))
+    except TypeError:
+        print(CliStyles.password_invalid.format(encryption_password))
+    except ServiceNotFound:
+        print(CliStyles.service_not_found.format(service_name))
+
+    if edited:
+        print(CliStyles.edit_success_resp.format(new_service_name))
+    else:
+        print("Error")
 
 
 def list_services(client: CredentialsManager):
     CliStyles.list_services(client.list_services())
 
+
 def clear():
     os.system("clear")
     print(CliStyles.ascii_art)
+
 
 if __name__ == "__main__":
     client = CredentialsManager()
