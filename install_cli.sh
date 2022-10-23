@@ -11,24 +11,24 @@ read -p "Please enter your name: " HOST_NAME
 read -p "Please enter sudo password: " PASSWORD
 echo -e "\n" 
 
-read -r -p "Please enter network share host location. Example: //guest:@192.168.1.69/NAS. Press enter to skip \n" NAS_HOST
+read -r -p "Please enter network share host location. Example: //guest:@192.168.1.69/NAS. Press enter to skip " NAS_HOST
 echo -e "\n"
 read -r -p "Please enter local net work share mount point. Example: /Volumes/NAS/. Press enter to skip. " NETWORK_SHARE
 
-if [$NETWORK_SHARE = '']
+if [ -z $NETWORK_SHARE ]
     then
-    NETWORK_SHARE = "/Volumes/NAS"
+    NETWORK_SHARE="/Volumes/NAS"
     echo 'Using defualt net work volume /Volumes/NAS'
 fi
-if [$NAS_HOST = '']
+if [ -z $NAS_HOST ]
     then
-    NAS_HOST = "//guest:@192.168.1.69/NAS"
+    NAS_HOST="//guest:@192.168.1.69/NAS"
     echo 'Using defualt net work volume //guest:@192.168.1.69/NAS'
 fi
 
 # Target strings to up date in settings file
-PASSWWORD_KEY="PASSWORD"
 HOST_TARGET_KEY="HOST"
+PASSWORD_KEY="PASSWORD"
 NET_SHARE_TARGET_KEY="NETWORK_SHARE_URI"
 NAS_HOST_KEY="NAS_HOST"
 
@@ -44,7 +44,7 @@ brew install python@3.10
 brew link --force python@3.10
 
 mkdir ~/.lockin
-cp lockin.sh requirements-cli.txt src/lockin/__init__.py src/lockin/cli.py src/lockin/manager.py src/lockin/cli_styles.py src/lockin/exceptions.py src/lockin/settings.py src/lockin/models.py ~/.lockin
+cp lockin.sh requirements-cli.txt src/lockin/__init__.py src/lockin/cli.py src/lockin/manager.py src/lockin/cli_styles.py src/lockin/exceptions.py src/lockin/settings.py src/lockin/models.py src/lockin/smb.py ~/.lockin
 cd ~/.lockin
 
 
