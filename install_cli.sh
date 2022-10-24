@@ -3,6 +3,10 @@
 function style_stdout () {
     echo -e "\033[0;32m $1 \033[0m"
 }
+function error_style_stdout () {
+    echo -e "\033[0;31m $1 \033[0m"
+}
+
 # Location of lockin settings file
 SETTINGS_FILE="src/lockin/settings.py"
 
@@ -13,17 +17,23 @@ echo -e "\n"
 
 read -r -p "Please enter network share host location. Example: //guest:@192.168.1.69/NAS. Press enter to skip " NAS_HOST
 echo -e "\n"
-read -r -p "Please enter local net work share mount point. Example: /Volumes/NAS/. Press enter to skip. " NETWORK_SHARE
+read -r -p "Please enter local network share mount point. Example: /Volumes/NAS/. Press enter to skip. " NETWORK_SHARE
 
 if [ -z $NETWORK_SHARE ]
     then
     NETWORK_SHARE="/Volumes/NAS"
-    echo 'Using defualt net work volume /Volumes/NAS'
+    echo 'Using defualt network volume /Volumes/NAS'
 fi
 if [ -z $NAS_HOST ]
     then
     NAS_HOST="//guest:@192.168.1.69/NAS"
-    echo 'Using defualt net work volume //guest:@192.168.1.69/NAS'
+    echo 'Using defualt network volume host //guest:@192.168.1.69/NAS'
+fi
+
+if [ -z $HOST_NAME ] || [ -z $PASSWORD ]
+then
+   error_style_stdout "Name and password are required."
+   exit 1
 fi
 
 # Target strings to up date in settings file
