@@ -55,6 +55,10 @@ brew link --force python@3.10
 
 mkdir ~/.lockin
 cp lockin.sh requirements-cli.txt src/lockin/__init__.py src/lockin/cli.py src/lockin/manager.py src/lockin/cli_styles.py src/lockin/exceptions.py src/lockin/settings.py src/lockin/models.py src/lockin/smb.py ~/.lockin
+
+# Undo changes to settings file
+git stash --quite && git stash drop --quite
+
 cd ~/.lockin
 
 
@@ -73,6 +77,8 @@ pip install -r requirements-cli.txt
 # Make scirpt executable
 chmod +x lockin.sh
 
-style_stdout "Please enter password: "
 # Link lockin command to lauch scirpt
-sudo ln -fs ~/.lockin/lockin.sh /usr/local/bin/lockin
+if [ ! -d "/usr/local/bin" ]; then
+    echo $PASSWORD|sudo -S mkdir /usr/local/bin
+fi
+echo $PASSWORD|sudo -S ln -fs ~/.lockin/lockin.sh /usr/local/bin/lockin
