@@ -67,7 +67,7 @@ def edit_service(client: CredentialsManager):
         CliStyles.service_name_edit_prompt, completer=services
     )
     encryption_password = prompt(CliStyles.decryption_pass_prompt)
-    new_service_name = prompt(CliStyles.edit_service_name_prompt)
+    new_service_name = prompt(CliStyles.edit_service_name_prompt) or service_name
     new_service_username = prompt(CliStyles.edit_username_prompt)
     new_service_password = prompt(CliStyles.edit_password_prompt)
     try:
