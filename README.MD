@@ -11,13 +11,22 @@
 
 
 ## Install & Build
-The only requirement for building LockIn locally is python3 & git. Then just clone the reop, cd in and run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install and the repo can be deleted.
+To build the Lockin app or cli locally, python3, git, and hombrew are required. Then just clone the reop, run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install and the repo can be deleted.
 
+Clone Repo
 ```
 git clone git@github.com:hyptocrypto/LockIn.git LockIn &&
 cd LockIn &&
-chmod + x install.sh &&
-/bin/bash install.sh
+```
+Install App
+```
+chmod + x install_app.sh &&
+/bin/zsh install_app.sh
+```
+Install CLI
+```
+chmod + x install_cli.sh &&
+/bin/zsh install_cli.sh
 ```
 
 #### Troubleshooting
@@ -35,9 +44,10 @@ If the app still will not open, try setting it to launch with Rosetta.
 
 ## Future development
 
-- [X] Local NAS based database sync. Keep same db synced across multiple devices
+- [X] Cli for ease of use during dev work.
+- [X] Local NAS based database sync. Keep same db synced across multiple devices on local network. 
 - [ ] Configurable datastore options. Current default is an sqlite db sitting in the home dir of the user.
-- [ ] UI updates and more keybindings. (Some of this will need to be done in the Toga GUI toolkit source code)
+- [ ] UI updates and more keybindings. (Some of this will need to be done in the Toga GUI toolkit source code).
 
 ## License
 The MIT License (MIT)
