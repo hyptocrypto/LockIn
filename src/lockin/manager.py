@@ -103,7 +103,6 @@ class CredentialsManager:
 
         # If connections from local db and network db exists, compare and update the older db
         if last_network_db_connection and last_local_db_connection:
-            ()
             if last_network_db_connection > last_local_db_connection:
                 shutil.copy(NETWORK_DB_URI, DB_URI)
 
