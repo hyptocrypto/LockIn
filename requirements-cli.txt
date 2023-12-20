@@ -11,7 +11,7 @@ distlib==0.3.6
 filelock==3.8.0
 iniconfig==1.1.1
 packaging==21.3
-peewee==3.15.2
+peewee==3.17.0
 platformdirs==2.5.2
 pluggy==1.0.0
 prompt-toolkit==3.0.30
