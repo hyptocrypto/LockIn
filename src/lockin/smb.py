@@ -2,6 +2,7 @@ import os
 import subprocess
 from settings import PASSWORD, NAS_HOST, NETWORK_SHARE_URI
 from exceptions import NetworkShareConnectionError
+from loader import Loader
 
 
 class SMBClient:
@@ -64,9 +65,10 @@ def with_smb(func):
 
     def wrap(*args):
         try:
-            with SMBClient():
-                func(*args)
-        except NetworkShareConnectionError:
+            with Loader("Attempting to connect to network share....."):
+                with SMBClient():
+                    func(*args)
+        except NetworkShareConnectionError as e:
             pass
 
     return wrap

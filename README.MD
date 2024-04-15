@@ -4,11 +4,16 @@
 
 **LockIn is a light-weight and encrypted password/credentials manager. The application implements EAR (encryption at rest) and is built as a cross platform native application using the [The BeeWare Project](https://beeware.org/). While only tested on macOS, the app should build on iOS, Windows, Linux and Android.**
 
-<kbd>
-<img width=350 src="docs/lockin_demo.png"/>
-</kbd>
-
-
+<div style="display: flex; flex-direction: row;">
+    <div style="text-align: center;">
+        <h3>GUI</h3>
+        <img width="350" src="docs/lockin_demo.png" alt="GUI Image">
+    </div>
+    <div style="text-align: center; margin-left: 20px;">
+        <h3>CLI</h3>
+        <img width="350" src="docs/cli.png" alt="CLI Image">
+    </div>
+</div>
 
 ## Install & Build
 To build the Lockin app or cli locally, python3, git, and hombrew are required. Then just clone the reop, run the install script. It will create a virtual environment to contain all the needed python packages. Once the app is complied into a disk image, it will launch the install and the repo can be deleted.
