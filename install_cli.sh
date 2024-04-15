@@ -45,7 +45,7 @@ brew install python@3.10
 brew link --force python@3.10
 
 mkdir ~/.lockin
-cp lockin.sh requirements-cli.txt src/lockin/__init__.py src/lockin/cli.py src/lockin/manager.py src/lockin/cli_styles.py src/lockin/exceptions.py src/lockin/settings.py src/lockin/models.py src/lockin/smb.py ~/.lockin
+cp lockin.sh requirements-cli.txt src/lockin/__init__.py src/lockin/cli.py src/lockin/manager.py src/lockin/cli_styles.py src/lockin/exceptions.py src/lockin/settings.py src/lockin/models.py src/lockin/smb.py src/lockin/loader.py ~/.lockin
 
 cd ~/.lockin
 
