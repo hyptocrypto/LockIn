@@ -3,7 +3,7 @@ import os
 # Name of DB owner
 HOST = "julian"
 
-PASSWORD = ""
+PASSWORD = "harvard"
 
 # Local mount point location of network share
 NETWORK_SHARE_URI = "/Volumes/NAS"

@@ -7,7 +7,6 @@ from prompt_toolkit.completion import WordCompleter
 from manager import CredentialsManager
 from cli_styles import CliStyles, prompt_factory_danger, prompt_factory_warn
 from exceptions import ServiceNotFound
-from loader import Loader
 
 
 def copy_to_clipboard(txt):
@@ -100,8 +99,7 @@ def clear():
 
 
 if __name__ == "__main__":
-    with Loader("Attempting to connect to network share....."):
-        client = CredentialsManager()
+    client = CredentialsManager()
     print(CliStyles.ascii_art)
     while True:
         action = prompt("")
