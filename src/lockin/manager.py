@@ -1,3 +1,6 @@
+import random
+import string
+
 import base64
 import os
 from datetime import datetime
@@ -209,6 +212,10 @@ class CredentialsManager:
         finally:
             self._db.close()
 
+    def gen_random_pass(self) -> str:
+        chrs = string.ascii_letters + string.digits + string.punctuation
+        return "".join([random.choice(chrs) for _ in range(15)])
+
     def list_services(self):
         self._db.connect()
         services = sorted(
@@ -223,7 +230,7 @@ class CredentialsManager:
         saved = self._encrypt(
             service_name.lower(),
             service_username,
-            service_password,
+            service_password or self.gen_random_pass(),
             encryption_password,
         )
         if saved:

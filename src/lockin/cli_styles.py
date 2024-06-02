@@ -141,7 +141,7 @@ class CliStyles:
     Enter Service Username: 
     """
     password_prompt = """
-    Enter Service Password: 
+    Enter Service Password (Leave blank for random password): 
     """
 
     edit_service_name_prompt = """
