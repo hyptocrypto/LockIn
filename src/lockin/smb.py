@@ -27,7 +27,7 @@ class SMBClient:
         if self.pre_connected:
             return self
         if not PASSWORD:
-            raise NetworkShareConnectionError(f"Sudo password missing.")
+            raise NetworkShareConnectionError("Sudo password missing.")
 
         # Create NETWORK_SHARE_URI dir if needed
         if not os.path.isdir(NETWORK_SHARE_URI):

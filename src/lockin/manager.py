@@ -1,35 +1,28 @@
+import random
+import string
+
 import base64
 import os
+import shutil
 from datetime import datetime
+from typing import Optional, Tuple
+
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.fernet import Fernet
-from cryptography.fernet import InvalidToken
-from settings import (
-    NETWORK_SHARE_URI,
-    NETWORK_DB_URI,
-    TESTING_DB_URI,
-    DB_URI,
-    SALT,
-)
+from exceptions import DuplicateServiceError, ServiceNotFound
 from models import (
-    Credentials,
     Connections,
-    NetCredentials,
+    Credentials,
     NetConnections,
-    TestCredentials,
+    NetCredentials,
     TestConnections,
-)
-from smb import with_smb
-from exceptions import (
-    DuplicateServiceError,
-    ServiceNotFound,
-    NetworkShareConnectionError,
+    TestCredentials,
 )
 from peewee import SqliteDatabase
-from typing import Optional, Tuple
-import shutil
+from settings import DB_URI, NETWORK_DB_URI, NETWORK_SHARE_URI, SALT, TESTING_DB_URI
+from smb import with_smb
 
 
 class CredentialsManager:
@@ -209,6 +202,10 @@ class CredentialsManager:
         finally:
             self._db.close()
 
+    def gen_random_pass(self) -> str:
+        chrs = string.ascii_letters + string.digits + string.punctuation
+        return "".join([random.choice(chrs) for _ in range(15)])
+
     def list_services(self):
         self._db.connect()
         services = sorted(
@@ -223,7 +220,7 @@ class CredentialsManager:
         saved = self._encrypt(
             service_name.lower(),
             service_username,
-            service_password,
+            service_password or self.gen_random_pass(),
             encryption_password,
         )
         if saved:
