@@ -2,7 +2,9 @@
 Delete list of service. Useful for forgot passwords.
 """
 
-from peewee import SqliteDatabase, Model, CharField
+from peewee import CharField, Model, SqliteDatabase
+
+db = SqliteDatabase("../../julian_credentials.db")
 
 
 class Credentials(Model):
@@ -15,7 +17,6 @@ class Credentials(Model):
         table_name = "credentials"
 
 
-db = SqliteDatabase("../../julian_credentials.db")
 db.connect()
 
 service_names = ["test", "test_service", "testtest"]
